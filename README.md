@@ -1,6 +1,13 @@
 # Sync(thing) Indicator
 Visualizes the synchronization status of [Syncthing](https://syncthing.net/) and [rsync](https://rsync.samba.org/) by changing the leds of an [AMD Wraith Prism](https://www.amd.com/en/technologies/cpu-cooler-solution) cooler using [cm-rgb](https://github.com/gfduszynski/cm-rgb).
 
+Overview of considered states and their meaning:
+
+| Down | Sync | Done | Idle | Error|
+|:----:|:----:|:----:|:----:|:----:|
+| Syncthing is not running (also shown on startup) | Syncthing is syncing or rsync is running | Syncthing is done and rsync is not running | Syncthing is running but not done (i.e. remote device down) | Syncthing error since boot | 
+| ![](doc/down.jpg) | ![](doc/sync.jpg) | ![](doc/done.jpg) | ![](doc/idle.jpg) | ![](doc/error.jpg) |
+
 ## Requirements
 
 This project requires that...
