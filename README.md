@@ -5,8 +5,10 @@ Overview of considered states and their meaning:
 
 | Down | Sync | Done | Idle | Error|
 |:----:|:----:|:----:|:----:|:----:|
-| Syncthing is not running (also shown on startup) | Syncthing is syncing or rsync is running | Syncthing is done and rsync is not running | Syncthing is running but not done (i.e. remote device down) | Syncthing error since boot | 
+| Syncthing is not running (also shown on startup) | Syncthing is syncing or rsync is running | Syncthing is done and rsync is not running | Syncthing is running but not done (e.g., remote device down) | Syncthing error since boot | 
 | ![](doc/down.jpg) | ![](doc/sync.jpg) | ![](doc/done.jpg) | ![](doc/idle.jpg) | ![](doc/error.jpg) |
+
+*Disclaimer: The error state was tested superficially, as we do not have access to errors thrown by Synching (yet).*
 
 ## Requirements
 
