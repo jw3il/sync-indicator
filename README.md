@@ -23,7 +23,7 @@ This script has been tested on Ubuntu 22.04 with Python 3.10.12.
 Steps
 1. Install requirements 
     ```
-    pip install -r requirements.txt
+    $ pip install -r requirements.txt
     ```
 2. Setting RGB colors without root permissions can be enabled by creating an udev rule file `/etc/udev/rules.d/60-cm-rgb.rules` with the following content:
     ```
@@ -36,7 +36,7 @@ Steps
 
 To run and debug the script, you can manually set the environment variables or load the configuration file like
 ```
-env $(cat env.conf | grep -e '^[^#]' | xargs) python3 sync-indicator/src/main.py
+$ env $(cat env.conf | grep -e '^[^#]' | xargs) python3 sync-indicator/src/main.py
 ```
 
 ## Systemd Service
@@ -63,10 +63,11 @@ WantedBy=default.target
 
 Test the service with
 ```
-systemctl --user daemon-reload && systemctl --user restart sync-indicator && sleep 2 && systemctl --user status -n 100 sync-indicator
+$ systemctl --user daemon-reload && systemctl --user restart sync-indicator && sleep 2 && systemctl --user status -n 100 sync-indicator
 ```
 
-Enable the service with
+Enable the service and user lingering (allows running user services without login) with
 ```
-systemctl --user enable sync-indicator
+$ systemctl --user enable sync-indicator
+$ loginctl enable-linger
 ```
