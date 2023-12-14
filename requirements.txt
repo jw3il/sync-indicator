@@ -1,2 +1,3 @@
 python-dateutil
 cm-rgb
+click

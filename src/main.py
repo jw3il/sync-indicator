@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from enum import Enum
 from typing import Optional
 import psutil
@@ -9,6 +11,7 @@ import subprocess
 from datetime import datetime
 from dateutil.parser import parse
 from dateutil.tz import tzlocal
+import click
 
 
 def proc_names() -> list[str]:
@@ -177,24 +180,26 @@ def down_args() -> list[str]:
     ]
 
 
-def set_led(state: SyncState):
-    def run_with_args(args: list[str]):
-        cmd = [f"{constants.CM_RGB_CLI_PATH}", *args]
+def run_cm_rgb_cli(args: list[str], verbose=True):
+    cmd = [f"{constants.CM_RGB_CLI_PATH}", *args]
+    if verbose:
         print(f"Executing {' '.join(cmd)}")
-        subprocess.run([f"{constants.CM_RGB_CLI_PATH}", *args])
+    subprocess.run([f"{constants.CM_RGB_CLI_PATH}", *args])
 
+
+def set_led(state: SyncState):
     if state == SyncState.DOWN:
-        run_with_args(down_args())
+        run_cm_rgb_cli(down_args())
     elif state == SyncState.SYNC:
-        run_with_args(static_rainbow_args("#1e99e6", rainbow_speed=3))
+        run_cm_rgb_cli(static_rainbow_args("#1e99e6", rainbow_speed=3))
     elif state == SyncState.DONE:
-        run_with_args(static_rainbow_args("#00ff00", rainbow_speed=1))
+        run_cm_rgb_cli(static_rainbow_args("#00ff00", rainbow_speed=1))
     elif state == SyncState.IDLE:
-        run_with_args(static_rainbow_args("#a746e8", rainbow_speed=1))
+        run_cm_rgb_cli(static_rainbow_args("#a746e8", rainbow_speed=1))
     elif state == SyncState.ERROR:
-        run_with_args(static_args("#ff0000"))
+        run_cm_rgb_cli(static_args("#ff0000"))
     else:
-        run_with_args(["restore"])
+        run_cm_rgb_cli(["restore"])
         print(f"LED: Unknown state {state} -> restore defaults")
 
 
@@ -210,9 +215,32 @@ def update_state(state: SyncState):
     set_led(state)
 
 
-if __name__ == "__main__":
+@click.group(chain=True)
+def main_group():
+    """
+    Controls the LEDs of an AMD Wraith Prism cooler to indicate the
+    synchronization state.
+
+    (polls the Syncthing API and checks if rsync is running)
+    """
+    pass
+
+
+@main_group.command()
+@click.option(
+    "--polling-interval",
+    type=click.FloatRange(min=0, clamp=True),
+    default=1,
+    help="Polling interval in seconds",
+)
+def run(polling_interval):
+    """
+    Indefinitely updates the LEDs to indicate the sync state.
+    """
+    # start with state down to indicate startup
+    update_state(SyncState.DOWN)
     while True:
-        time.sleep(1)
+        time.sleep(polling_interval)
         if not syncthing_is_up():
             update_state(SyncState.DOWN)
             continue
@@ -223,7 +251,7 @@ if __name__ == "__main__":
 
         is_incomplete = syncthing_completion() < 100
         is_syncing = (
-            is_incomplete and syncthing_is_downloading()
+            is_incomplete and syncthing_is_downloading(initial_delay=polling_interval)
         ) or rsync_is_running()
         if is_syncing:
             update_state(SyncState.SYNC)
@@ -233,3 +261,21 @@ if __name__ == "__main__":
         else:
             # not syncing and complete => done
             update_state(SyncState.DONE)
+
+
+@main_group.command()
+def demo():
+    """
+    Iterates through all states once, then restores the LED settings.
+    """
+    print("Running demo")
+    for state in SyncState:
+        print()
+        update_state(state)
+        time.sleep(1)
+
+    run_cm_rgb_cli(["restore"])
+
+
+if __name__ == "__main__":
+    main_group()

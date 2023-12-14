@@ -43,7 +43,7 @@ StartLimitIntervalSec=500
 StartLimitBurst=5
 
 [Service]
-ExecStart=python3 -O -u /home/led/sync-indicator/src/main.py
+ExecStart=python3 -O -u /home/led/sync-indicator/src/main.py run
 EnvironmentFile=/home/led/sync-indicator.conf
 Restart=on-failure
 RestartSec=5s
